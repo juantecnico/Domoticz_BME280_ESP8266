@@ -125,9 +125,9 @@ void setup() {
   WiFiManagerParameter custom_domoticz_server("server", "Servidor Domoticz", domoticz_server, 40);
   WiFiManagerParameter custom_domoticz_port("port", "Puerto Domoticz", domoticz_port, 5);
   WiFiManagerParameter custom_domoticz_id_temp("id", "Id Temperatura", domoticz_id_temp, 4);
-  WiFiManagerParameter custom_domoticz_id_hr("id", "Id humedad relativa", domoticz_id_hr, 4);
-  WiFiManagerParameter custom_domoticz_id_pa("id", "Id barometro", domoticz_id_pa, 4);
-  WiFiManagerParameter custom_domoticz_id_bat("id", "Id voltaje bat", domoticz_id_bat, 4);
+  WiFiManagerParameter custom_domoticz_id_hr("id1", "Id humedad relativa", domoticz_id_hr, 4);
+  WiFiManagerParameter custom_domoticz_id_pa("id2", "Id barometro", domoticz_id_pa, 4);
+  WiFiManagerParameter custom_domoticz_id_bat("id3", "Id voltaje bat", domoticz_id_bat, 4);
   WiFiManager wifiManager;
   //set config save notify callback
   wifiManager.setSaveConfigCallback(saveConfigCallback);
@@ -146,7 +146,7 @@ void setup() {
   wifiManager.addParameter(&custom_domoticz_id_bat);
   wifiManager.setMinimumSignalQuality();
   wifiManager.setTimeout(120);
-  if (!wifiManager.autoConnect("Sensor280", "password")) {
+  if (!wifiManager.autoConnect("Sensor280")) {
     Serial.println("failed to connect and hit timeout");
     delay(3000);
     ESP.reset();
@@ -251,7 +251,6 @@ void loop() {
   //Serial.println (int(domoticz_port));
   if (client.connect(domoticz_server, 8080) ) {
     long rssi = WiFi.RSSI();
-
     String json1 = "GET /json.htm?type=command&param=udevice&idx=";
     json1 += String(domoticz_id_temp);
     json1 += "&nvalue=0&svalue=";
@@ -264,11 +263,14 @@ void loop() {
       String line = client.readStringUntil('\r');
       Serial.print(line);
     }
-    json1 = "GET /json.htm?type=command&param=udevice&idx=";
+    client.stop();
+  }
+  if (client.connect(domoticz_server, 8080) ) {
+    String json1 = "GET /json.htm?type=command&param=udevice&idx=";
     json1 += String(domoticz_id_hr);
-    json1 += "&nvalue=0&svalue=";
+    json1 += "&nvalue=";
     json1 += String(bme.readHumidity());
-    json1 += ";0";
+    json1 += ";&svalue=0";
     json1 += " HTTP/1.0";
     client.println(json1);
     client.println();
@@ -277,7 +279,9 @@ void loop() {
       String line = client.readStringUntil('\r');
       Serial.print(line);
     }
-    json1 = "GET /json.htm?type=command&param=udevice&idx=";
+    client.stop();}
+    if (client.connect(domoticz_server, 8080) ) {
+    String json1 = "GET /json.htm?type=command&param=udevice&idx=";
     json1 += String(domoticz_id_pa);
     json1 += "&nvalue=0&svalue=";
     json1 += String(bme.readPressure() / 100.0F);
@@ -299,7 +303,9 @@ void loop() {
   Udp.endPacket();
   uint32_t getVcc = ESP.getVcc();
   if (client.connect(domoticz_server, 8080) ) {
-    String url = "/json.htm?type=command&param=udevice&idx=11&nvalue=0&svalue=";
+    String url = "/json.htm?type=command&param=udevice&idx=";
+    url+= String(domoticz_id_bat);
+    url += "&nvalue=0&svalue=";
     url += (getVcc / 1000.000F);
     Serial.println(url);
     client.println(String("GET ") + url + " HTTP/1.0");
