@@ -162,7 +162,7 @@ void setup() {
   //in seconds
   //wifiManager.setTimeout(120);
 
-  //fetches ssid and pass and tries to connect
+ 
   //if it does not connect it starts an access point with the specified name
   //here  "AutoConnectAP"
   //and goes into a blocking loop awaiting configuration
