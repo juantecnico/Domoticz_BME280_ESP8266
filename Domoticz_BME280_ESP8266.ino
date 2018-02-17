@@ -1,4 +1,4 @@
-#include <FS.h>                   
+#include <FS.h>
 #include <Wire.h>
 #include <SPI.h>
 #include <Adafruit_Sensor.h>
@@ -31,10 +31,10 @@ const byte DNS_PORT = 53;
 char domoticz_server[40];
 char domoticz_port[6] = "8080";
 //BME280 tiene 3 sensores creamos los tres más el nivel de bateria
-char domoticz_id_temp[4] = "";  
-char domoticz_id_hr[4] = "";  
-char domoticz_id_pa[4] = "";  
-char domoticz_id_bat[4] = "";  
+char domoticz_id_temp[4] = "";
+char domoticz_id_hr[4] = "";
+char domoticz_id_pa[4] = "";
+char domoticz_id_bat[4] = "";
 //default custom static IP
 char static_ip[16] = "192.168.1.20";
 char static_gw[16] = "192.168.1.20";
@@ -217,7 +217,8 @@ void loop() {
     Serial.println("Reseteando a valores de fabrica");
     wifiManager.resetSettings();
     delay(1000);
-    ESP.reset();}/*
+    ESP.reset();
+  }/*
     //sets timeout until configuration portal gets turned off
     //useful to make it all retry or go to sleep
     //in seconds
@@ -260,8 +261,8 @@ void loop() {
     client.println();
     Serial.println (json1);
     while (client.available()) {
-     String line = client.readStringUntil('\r');
-     Serial.print(line);
+      String line = client.readStringUntil('\r');
+      Serial.print(line);
     }
     json1 = "GET /json.htm?type=command&param=udevice&idx=";
     json1 += String(domoticz_id_hr);
@@ -273,8 +274,8 @@ void loop() {
     client.println();
     Serial.println (json1);
     while (client.available()) {
-     String line = client.readStringUntil('\r');
-     Serial.print(line);
+      String line = client.readStringUntil('\r');
+      Serial.print(line);
     }
     json1 = "GET /json.htm?type=command&param=udevice&idx=";
     json1 += String(domoticz_id_pa);
@@ -286,19 +287,16 @@ void loop() {
     client.println();
     Serial.println (json1);
     while (client.available()) {
-     String line = client.readStringUntil('\r');
-     Serial.print(line);
+      String line = client.readStringUntil('\r');
+      Serial.print(line);
     }
-        client.stop();
+    client.stop();
   }
   IPAddress BcastIP = WiFi.localIP();
   BcastIP[3] = 255;
   Udp.beginPacket(BcastIP, 2391);
   Udp.write("Bme 280 Domoticz Bateria+control avanzado del sensor.");
   Udp.endPacket();
-  //
-
-
   uint32_t getVcc = ESP.getVcc();
   if (client.connect(domoticz_server, 8080) ) {
     String url = "/json.htm?type=command&param=udevice&idx=11&nvalue=0&svalue=";
